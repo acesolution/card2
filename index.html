@@ -23,9 +23,7 @@
             color: #979797;
             font-weight: bold;
         }
-        .deck-container{
-            display: none;
-        }
+        
         .container {
             display: flex;
             flex-direction: row;
@@ -313,7 +311,9 @@
             font-size: 1.4em;
             color: #a8a7a7;
         }
-
+        .deck-container{
+            display: none;
+        }   
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -2007,7 +2007,7 @@
                         </div>
                     `;
                     deckContainer.appendChild(deckCard);
-                    deckContainer.style.display = none;
+                    // deckContainer.style.display = 'none';
                 });
             }
     
@@ -2128,6 +2128,29 @@
             filtersCount.textContent = 'Filters (0)';
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardGalleryButton = document.querySelector('.button1');
+            const deckButton = document.querySelector('.button2');
+            const cardContainer = document.querySelector('.card-container');
+            const deckContainer = document.querySelector('.deck-container');
+    
+            cardGalleryButton.addEventListener('click', function() {
+                // Hide the deck container
+                deckContainer.style.display = 'none';
+                // Show the card container
+                cardContainer.style.display = 'flex';
+            });
+    
+            deckButton.addEventListener('click', function() {
+                // Hide the card container
+                cardContainer.style.display = 'none';
+                // Show the deck container
+                deckContainer.style.display = 'flex';
+            });
+        });
+    </script> 
+    
     
     
     
