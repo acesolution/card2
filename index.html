@@ -338,6 +338,9 @@
         .deck-container{
             display: none;
         }   
+        .screenshot-button{
+            display: none;
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -417,6 +420,8 @@
                 <span class="span3">Filters (0)</span>
                 <button class="button4">&#10005; Clear Filters</button>
             </div>
+            <!-- <button id="screenshot-button" class="screenshot-button">Save Deck Screenshot</button> -->
+
             <div class="card-container">
                 <!-- Each card item -->
                 <div class="card" data-card-id="1" data-card-info="Beelzebul, Nightmare King" data-card-image="https://i.imgur.com/lEbKUBT.png" data-faction="Mattervoid" data-type="Fabled, Character" data-note="Details Of This Card">
@@ -1787,6 +1792,7 @@
                     <!-- Cards added to the deck will be displayed here -->
                 </div>
             </div>
+
             
         </section>
     </div>
@@ -1808,35 +1814,52 @@
                 renowned: 0,
                 others: {}
             };
-    
+        
             const MAX_DECK_SIZE = 35;
             const MAX_FABLED_CARDS = 2;
             const MAX_RENOWNED_CARDS = 4;
             const MAX_CARD_COPIES = 3;
-            
-
+        
+            function loadDeckFromStorage() {
+                const storedDeck = JSON.parse(localStorage.getItem('deck'));
+                if (storedDeck) {
+                    deck = storedDeck;
+                    deck.forEach(card => {
+                        cardCount.total += card.count;
+                        const cardTypes = card.type.split(',').map(type => type.trim());
+                        if (cardTypes.includes("Fabled")) {
+                            cardCount.fabled++;
+                        } else if (cardTypes.includes("Renowned")) {
+                            cardCount.renowned++;
+                        } else {
+                            cardCount.others[card.cardInfo] = (cardCount.others[card.cardInfo] || 0) + card.count;
+                        }
+                    });
+                    renderDeck();
+                    updateDeckCount();
+                    updateCardGalleryCounts();
+                }
+            }
+        
+            function saveDeckToStorage() {
+                localStorage.setItem('deck', JSON.stringify(deck));
+            }
+        
             function isDeckValid(card) {
-                // Check if the deck exceeds the total card limit
                 if (cardCount.total >= MAX_DECK_SIZE) {
                     alert('Deck cannot have more than 35 cards.');
                     return false;
                 }
-
-                // Split the card types by comma and check if any of them is valid
                 const cardTypes = card.type.split(',').map(type => type.trim());
                 const isValidType = cardTypes.some(type => validTypes.includes(type));
                 if (!isValidType) {
                     alert('Invalid card type.');
                     return false;
                 }
-
-                // Check if card faction is valid
                 if (!validFactions.includes(card.faction)) {
                     alert('Invalid card faction.');
                     return false;
                 }
-
-                // Check specific rules for Fabled cards
                 if (cardTypes.includes("Fabled")) {
                     const existingFabledCards = deck.filter(c => c.type.includes("Fabled"));
                     if (existingFabledCards.length >= MAX_FABLED_CARDS) {
@@ -1848,8 +1871,6 @@
                         return false;
                     }
                 }
-
-                // Check specific rules for Renowned cards
                 if (cardTypes.includes("Renowned")) {
                     const existingRenownedCards = deck.filter(c => c.type.includes("Renowned"));
                     if (existingRenownedCards.length >= MAX_RENOWNED_CARDS) {
@@ -1861,24 +1882,18 @@
                         return false;
                     }
                 }
-
-                // Check if the deck already contains the maximum allowed copies of the card
                 const existingCard = deck.find(c => c.cardInfo === card.name);
                 if (existingCard && existingCard.count >= MAX_CARD_COPIES) {
                     alert(`Deck cannot have more than ${MAX_CARD_COPIES} copies of each card.`);
                     return false;
                 }
-
                 return true;
             }
-                    
+        
             function addCardToDeck(cardId, count, cardElement) {
-                // Ensure deck is an array and initialize if necessary
                 deck = Array.isArray(deck) ? deck : [];
-                // Find existing card in the deck
                 const existingCard = deck.find(item => item.cardId === cardId);
                 if (count > 0) {
-                    // If the card already exists in the deck, update its count
                     if (existingCard) {
                         const cardTypes = existingCard.type.split(',').map(type => type.trim());
                         if ((cardTypes.includes("Fabled") || cardTypes.includes("Renowned")) && existingCard.count >= 1) {
@@ -1888,12 +1903,10 @@
                         existingCard.count = count;
                         cardCount.total++;
                     } else {
-                        // If the card is not in the deck, add it
                         const cardInfo = cardElement.dataset.cardInfo;
                         const cardImage = cardElement.dataset.cardImage;
                         const cardType = cardElement.dataset.type;
                         const cardFaction = cardElement.dataset.faction;
-
                         const newCard = {
                             cardId,
                             cardInfo,
@@ -1902,13 +1915,9 @@
                             type: cardType,
                             faction: cardFaction
                         };
-
-                        // Check if the card is valid for the deck
                         if (isDeckValid(newCard)) {
                             deck.push(newCard);
                             cardCount.total++;
-
-                            // Update card counts based on type
                             const cardTypes = cardType.split(',').map(type => type.trim());
                             if (cardTypes.includes("Fabled")) {
                                 cardCount.fabled++;
@@ -1919,32 +1928,26 @@
                             }
                         }
                     }
+                    saveDeckToStorage();
                 } else {
-                    // If the card count is 0, remove the card from the deck
                     const cardIndex = deck.findIndex(item => item.cardId === cardId);
                     if (cardIndex > -1) {
                         deck.splice(cardIndex, 1);
                     }
                 }
-
-                // Render the deck after updating it
                 updateDeckCount();
                 renderDeck();
             }
-    
-                
-    
+        
             function removeCardFromDeck(card) {
                 const existingCard = deck.find(c => 
                     c.cardInfo === card.name && 
                     c.type === card.type && 
                     c.faction === card.faction
                 );
-    
                 if (existingCard) {
                     existingCard.count--;
                     cardCount.total--;
-    
                     const cardTypes = card.type.split(',').map(type => type.trim());
                     if (cardTypes.includes("Fabled")) {
                         cardCount.fabled--;
@@ -1956,7 +1959,6 @@
                             delete cardCount.others[card.name];
                         }
                     }
-    
                     if (existingCard.count === 0) {
                         const index = deck.findIndex(c => 
                             c.cardInfo === card.name && 
@@ -1967,94 +1969,17 @@
                             deck.splice(index, 1);
                         }
                     }
+                    saveDeckToStorage();
                 }
                 updateDeckCount();
                 renderDeck();
             }
-    
-            // Function to remove card from deck
-            const cards = document.querySelectorAll('.card');
-            const modal = document.getElementById('popup-modal');
-            const closeButton = document.querySelector('.close-button');
-            const popupImage = document.getElementById('popup-image');
-            const popupName = document.getElementById('popup-name');
-            const popupNote = document.getElementById('popup-note');
-            const popupFaction = document.getElementById('popup-faction');
-            const popupType = document.getElementById('popup-type');
-            const deckContainer = document.querySelector('.deck');
-            const deckCompleteContainer = document.querySelector('.deck-container');
-            const deckCountSpan = document.getElementById('deck-count');
-            
-
+        
             function updateDeckCount() {
                 deckCountSpan.textContent = `(${cardCount.total})`;
             }
-            cards.forEach(card => {
-                card.addEventListener('click', function(event) {
-                    if (event.target.classList.contains('increment') || event.target.classList.contains('decrement')) {
-                        return;
-                    }
-    
-                    const cardInfo = card.getAttribute('data-card-info');
-                    const cardImage = card.getAttribute('data-card-image');
-                    const cardFaction = card.getAttribute('data-faction');
-                    const cardType = card.getAttribute('data-type');
-                    const cardNote = card.getAttribute('data-note');
-    
-                    if (cardImage && cardInfo && cardFaction && cardType) {
-                        popupImage.src = cardImage;
-                        popupName.textContent = cardInfo;
-                        popupFaction.textContent = cardFaction;
-                        popupType.textContent = cardType;
-                        popupNote.textContent = cardNote;
-                        modal.style.display = 'block';
-                    } else {
-                        console.error('Data attributes are missing or incorrect.');
-                    }
-                });
-    
-                const decrementButton = card.querySelector('.decrement');
-                const incrementButton = card.querySelector('.increment');
-                const countSpan = card.querySelector('.count');
-                const cardId = card.dataset.cardId;
-    
-                decrementButton.addEventListener('click', function(event) {
-                    event.stopPropagation();
-    
-                    let count = parseInt(countSpan.textContent);
-                    if (count > 0) {
-                        count--;
-    
-                        const cardData = {
-                            name: card.getAttribute('data-card-info'),
-                            type: card.getAttribute('data-type'),
-                            faction: card.getAttribute('data-faction')
-                        };
-    
-                        countSpan.textContent = count;
-                        removeCardFromDeck(cardData);
-                    }
-                });
-    
-                incrementButton.addEventListener('click', function(event) {
-                    event.stopPropagation();
-    
-                    const cardData = {
-                        name: card.getAttribute('data-card-info'),
-                        type: card.getAttribute('data-type'),
-                        faction: card.getAttribute('data-faction')
-                    };
-    
-                    let count = parseInt(countSpan.textContent);
-                    count++;
-    
-                    if (isDeckValid(cardData)) {
-                        countSpan.textContent = count;
-                        addCardToDeck(cardId, count, card);
-                    }
-                });
-            });
-    
+        
+
             function renderDeck() {
                 deckContainer.innerHTML = '';
                 let visibleCount = 0;
@@ -2066,8 +1991,10 @@
                         <div class="deck-card-info">
                             <h4>${item.cardInfo}</h4>
                         </div>
-                        <div>
-                            <span>Count: ${item.count}</span>
+                        <div class="card-counter">
+                            <button class="decrement">-</button>
+                            <span class="count">${item.count}</span>
+                            <button class="increment">+</button>
                         </div>
                     `;
                     deckContainer.appendChild(deckCard);
@@ -2076,21 +2003,153 @@
                     } else {
                         deckCard.style.height = 'auto';
                     }
+
+                    // Add event listener to show popup on click
+                    deckCard.addEventListener('click', function(event) {
+                        if (event.target.classList.contains('increment') || event.target.classList.contains('decrement')) {
+                            return;
+                        }
+
+                        popupImage.src = item.cardImage;
+                        popupName.textContent = item.cardInfo;
+                        popupFaction.textContent = item.faction;
+                        popupType.textContent = item.type;
+                        modal.style.display = 'block';
+                    });
+
+                    // Add event listeners for increment and decrement buttons
+                    const decrementButton = deckCard.querySelector('.decrement');
+                    const incrementButton = deckCard.querySelector('.increment');
+                    const countSpan = deckCard.querySelector('.count');
+
+                    decrementButton.addEventListener('click', function(event) {
+                        event.stopPropagation();
+
+                        let count = parseInt(countSpan.textContent);
+                        if (count > 0) {
+                            count--;
+
+                            const cardData = {
+                                name: item.cardInfo,
+                                type: item.type,
+                                faction: item.faction
+                            };
+
+                            countSpan.textContent = count;
+                            removeCardFromDeck(cardData);
+                        }
+                    });
+
+                    incrementButton.addEventListener('click', function(event) {
+                        event.stopPropagation();
+
+                        const cardData = {
+                            name: item.cardInfo,
+                            type: item.type,
+                            faction: item.faction
+                        };
+
+                        let count = parseInt(countSpan.textContent);
+                        count++;
+
+                        if (isDeckValid(cardData)) {
+                            countSpan.textContent = count;
+                            addCardToDeck(item.cardId, count, deckCard);
+                        }
+                    });
                 });
                 deckCompleteContainer.style.marginTop = '0px';
             }
-    
-            closeButton.addEventListener('click', () => {
+
+            
+            function updateCardGalleryCounts() {
+                cards.forEach(card => {
+                    const cardId = card.dataset.cardId;
+                    const existingCard = deck.find(item => item.cardId === cardId);
+                    if (existingCard) {
+                        const countSpan = card.querySelector('.count');
+                        countSpan.textContent = existingCard.count;
+                    }
+                });
+            }
+        
+            const cards = document.querySelectorAll('.card');
+            const modal = document.getElementById('popup-modal');
+            const closeButton = document.querySelector('.close-button');
+            const popupImage = document.getElementById('popup-image');
+            const popupName = document.getElementById('popup-name');
+            const popupFaction = document.getElementById('popup-faction');
+            const popupType = document.getElementById('popup-type');
+            const deckContainer = document.querySelector('.deck');
+            const deckCompleteContainer = document.querySelector('.deck-container');
+            const deckCountSpan = document.getElementById('deck-count');
+        
+            cards.forEach(card => {
+                card.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('increment') || event.target.classList.contains('decrement')) {
+                        return;
+                    }
+                    const cardInfo = card.getAttribute('data-card-info');
+                    const cardImage = card.getAttribute('data-card-image');
+                    const cardFaction = card.getAttribute('data-faction');
+                    const cardType = card.getAttribute('data-type');
+                    if (cardImage && cardInfo && cardFaction && cardType) {
+                        popupImage.src = cardImage;
+                        popupName.textContent = cardInfo;
+                        popupFaction.textContent = cardFaction;
+                        popupType.textContent = cardType;
+                        modal.style.display = 'block';
+                    } else {
+                        console.error('Data attributes are missing or incorrect.');
+                    }
+                });
+        
+                const decrementButton = card.querySelector('.decrement');
+                const incrementButton = card.querySelector('.increment');
+                const countSpan = card.querySelector('.count');
+                const cardId = card.dataset.cardId;
+        
+                decrementButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    let count = parseInt(countSpan.textContent);
+                    if (count > 0) {
+                        count--;
+                        countSpan.textContent = count;
+                        const cardData = {
+                            name: card.getAttribute('data-card-info'),
+                            type: card.getAttribute('data-type'),
+                            faction: card.getAttribute('data-faction')
+                        };
+                        removeCardFromDeck(cardData);
+                        updateCardGalleryCounts(); // Update the card gallery counts
+                    }
+                });
+        
+                incrementButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const cardData = {
+                        name: card.getAttribute('data-card-info'),
+                        type: card.getAttribute('data-type'),
+                        faction: card.getAttribute('data-faction')
+                    };
+                    let count = parseInt(countSpan.textContent);
+                    count++;
+                    if (isDeckValid(cardData)) {
+                        countSpan.textContent = count;
+                        addCardToDeck(cardId, count, card);
+                        updateCardGalleryCounts(); // Update the card gallery counts
+                    }
+                });
+            });
+        
+            closeButton.addEventListener('click', function() {
                 modal.style.display = 'none';
             });
-    
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
+        
+            loadDeckFromStorage();
         });
-    </script>
+        </script>
+        
     <!-- Apply Filters -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -2199,6 +2258,8 @@
             const deckContainer = document.querySelector('.deck-container');
             const filterSection = document.getElementById('filter-section');
             const additionalSection = document.getElementById('additional-buttons');
+            const screenshotButton = document.getElementById('screenshot-button');
+
     
             function disableFilters() {
                 filterSection.classList.add('disabled');
@@ -2216,6 +2277,7 @@
                 cardContainer.style.display = 'flex';
                 // Hide the deck container
                 deckContainer.style.display = 'none';
+                screenshotButton.style.display = 'none';
                 // Enable filters
                 enableFilters();
             });
@@ -2225,14 +2287,102 @@
                 cardContainer.style.display = 'none';
                 // Show the deck container
                 deckContainer.style.display = 'flex';
+                screenshotButton.style.display = 'block';
                 // Disable filters
                 disableFilters();
             });
         });
     </script>
-    
-    
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const screenshotButton = document.getElementById('screenshot-button');
+            const deckContainer = document.querySelector('.deck-container');
+
+            screenshotButton.addEventListener('click', () => {
+                html2canvas(deckContainer).then(canvas => {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'deck-screenshot.png';
+                    link.click();
+                });
+            });
+        });
+
+    </script>
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const screenshotButton = document.getElementById('screenshot-button');
+            const deckContainer = document.querySelector('.deck-container');
+
+            screenshotButton.addEventListener('click', () => {
+                // Wait for images to load
+                Promise.all(Array.from(deckContainer.querySelectorAll('img')).map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = img.onerror = resolve;
+                    });
+                })).then(() => {
+                    html2canvas(deckContainer, {
+                        useCORS: true // Enable cross-origin image loading
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = 'deck-screenshot.png';
+                        link.click();
+                    });
+                });
+            });
+        });
+    </script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const screenshotButton = document.getElementById('screenshot-button');
+    const deckContainer = document.querySelector('.deck-container');
+
+    screenshotButton.addEventListener('click', () => {
+        // Force reflow by accessing offsetWidth
+        deckContainer.offsetWidth;
+
+        // Create a promise to wait for images to load
+        const imagesLoaded = new Promise(resolve => {
+            const images = deckContainer.querySelectorAll('img');
+            let loadedCount = 0;
+            images.forEach(image => {
+                if (image.complete) {
+                    loadedCount++;
+                } else {
+                    image.onload = () => {
+                        loadedCount++;
+                        if (loadedCount === images.length) {
+                            resolve();
+                        }
+                    };
+                }
+            });
+            if (loadedCount === images.length) {
+                resolve();
+            }
+        });
+
+        // Wait for images to load before taking the screenshot
+        imagesLoaded.then(() => {
+            // Explicitly set dimensions of deckContainer
+            deckContainer.style.width = deckContainer.scrollWidth + 'px';
+            deckContainer.style.height = deckContainer.scrollHeight + 'px';
+
+            html2canvas(deckContainer).then(canvas => {
+                // Append the canvas to the body
+                document.body.appendChild(canvas);  
+                dataURL = canvas.toDataURL();  
+                // Optionally save the screenshot on the server side
+                pushScreenshotToServer(dataURL); 
+            });  
+        });
+    });
+});
+
+    </script>
     
 </body>
 </html>
