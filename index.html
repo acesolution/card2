@@ -2258,7 +2258,7 @@
             const deckContainer = document.querySelector('.deck-container');
             const filterSection = document.getElementById('filter-section');
             const additionalSection = document.getElementById('additional-buttons');
-            const screenshotButton = document.getElementById('screenshot-button');
+            // const screenshotButton = document.getElementById('screenshot-button');
 
     
             function disableFilters() {
@@ -2277,7 +2277,7 @@
                 cardContainer.style.display = 'flex';
                 // Hide the deck container
                 deckContainer.style.display = 'none';
-                screenshotButton.style.display = 'none';
+                // screenshotButton.style.display = 'none';
                 // Enable filters
                 enableFilters();
             });
@@ -2287,29 +2287,13 @@
                 cardContainer.style.display = 'none';
                 // Show the deck container
                 deckContainer.style.display = 'flex';
-                screenshotButton.style.display = 'block';
+                // screenshotButton.style.display = 'block';
                 // Disable filters
                 disableFilters();
             });
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const screenshotButton = document.getElementById('screenshot-button');
-            const deckContainer = document.querySelector('.deck-container');
-
-            screenshotButton.addEventListener('click', () => {
-                html2canvas(deckContainer).then(canvas => {
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'deck-screenshot.png';
-                    link.click();
-                });
-            });
-        });
-
-    </script>
     <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
             const screenshotButton = document.getElementById('screenshot-button');
@@ -2335,7 +2319,7 @@
             });
         });
     </script> -->
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
     const screenshotButton = document.getElementById('screenshot-button');
     const deckContainer = document.querySelector('.deck-container');
@@ -2382,7 +2366,7 @@
     });
 });
 
-    </script>
+    </script> -->
     
 </body>
 </html>
