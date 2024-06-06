@@ -81,9 +81,10 @@
             width: 75%;
             display: flex;
             flex-wrap: wrap;
-            padding: 1em;
+            /* padding: 1em; */
             box-sizing: border-box;
             overflow-y: auto;
+	        overflow-x: hidden;
             height: auto;
         }
 
@@ -187,7 +188,7 @@
             /* width: 100%; */
             /* padding: 0 1em; Add padding to match the padding of the card gallery */
             box-sizing: border-box;
-            position: absolute;
+            /* position: absolute; */
             top: 1em;
             /* left: 30%; */
             z-index: 1; /* Ensure buttons are displayed above the cards */
@@ -218,7 +219,7 @@
         .card-container, .deck-container, .deck {
             width: 100%;
             position: relative;
-            margin-top: 65px; /* Adjust as needed to create space for the buttons */
+            margin-top: 100px; /* Adjust as needed to create space for the buttons */
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -226,9 +227,10 @@
         .additional-buttons {
             display: flex;
             justify-content: space-between;
-            margin-top: 40px; /* Adjust margin as needed */
+            /* margin-top: 40px; Adjust margin as needed */
             position: absolute;
             z-index: 10;
+	    padding: 0px 10px;
         }
 
         .additional-buttons button {
@@ -341,6 +343,23 @@
         .screenshot-button{
             display: none;
         }
+        .screenshot-button {
+            display: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #212121; /* Bootstrap primary color */
+            color: white;
+            border: 2px solid #393939;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            /* margin-top: 20px; Adjust as needed */
+            position: absolute;
+        }
+
+        .screenshot-button:hover {
+            background-color: #393939; /* Darker shade for hover effect */
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -412,16 +431,24 @@
             
         </aside>
         <section class="card-gallery">
-            <div class="button-container">
-                <button class="button1">CARD GALLERY</button>
-                <button class="button2">DECK <span id="deck-count">(0)</span> </button>
+            <div style="display: block;
+    width: 73.5%;
+    height: 6em;
+    /* margin-top: -15px; */
+    background-color: #212121;
+    position: fixed;
+    z-index: 400;">	
+                <div class="button-container">
+                    <button class="button1">CARD GALLERY</button>
+                    <button class="button2">DECK <span id="deck-count">(0)</span> </button>
+                </div>
+                <div class="additional-buttons" id="additional-buttons">
+                    <span class="span3">Filters (0)</span>
+                    <button class="button4">&#10005; Clear Filters</button>
+                </div>
+                
+                <button id="screenshot-button" class="screenshot-button" style="position: absolute;"><span> Save Deck Screenshot</span></button>
             </div>
-            <div class="additional-buttons" id="additional-buttons">
-                <span class="span3">Filters (0)</span>
-                <button class="button4">&#10005; Clear Filters</button>
-            </div>
-            <!-- <button id="screenshot-button" class="screenshot-button">Save Deck Screenshot</button> -->
-
             <div class="card-container">
                 <!-- Each card item -->
                 <div class="card" data-card-id="1" data-card-info="Beelzebul, Nightmare King" data-card-image="https://i.imgur.com/lEbKUBT.png" data-faction="Mattervoid" data-type="Fabled, Character" data-note="Details Of This Card">
@@ -1814,12 +1841,12 @@
                 renowned: 0,
                 others: {}
             };
-        
+
             const MAX_DECK_SIZE = 35;
             const MAX_FABLED_CARDS = 2;
             const MAX_RENOWNED_CARDS = 4;
             const MAX_CARD_COPIES = 3;
-        
+
             function loadDeckFromStorage() {
                 const storedDeck = JSON.parse(localStorage.getItem('deck'));
                 if (storedDeck) {
@@ -1840,11 +1867,11 @@
                     updateCardGalleryCounts();
                 }
             }
-        
+
             function saveDeckToStorage() {
                 localStorage.setItem('deck', JSON.stringify(deck));
             }
-        
+
             function isDeckValid(card) {
                 if (cardCount.total >= MAX_DECK_SIZE) {
                     alert('Deck cannot have more than 35 cards.');
@@ -1889,7 +1916,7 @@
                 }
                 return true;
             }
-        
+
             function addCardToDeck(cardId, count, cardElement) {
                 deck = Array.isArray(deck) ? deck : [];
                 const existingCard = deck.find(item => item.cardId === cardId);
@@ -1937,12 +1964,13 @@
                 }
                 updateDeckCount();
                 renderDeck();
+                updateCardGalleryCounts(); // Ensure the card gallery counts are updated
             }
-        
+
             function removeCardFromDeck(card) {
-                const existingCard = deck.find(c => 
-                    c.cardInfo === card.name && 
-                    c.type === card.type && 
+                const existingCard = deck.find(c =>
+                    c.cardInfo === card.name &&
+                    c.type === card.type &&
                     c.faction === card.faction
                 );
                 if (existingCard) {
@@ -1960,9 +1988,9 @@
                         }
                     }
                     if (existingCard.count === 0) {
-                        const index = deck.findIndex(c => 
-                            c.cardInfo === card.name && 
-                            c.type === card.type && 
+                        const index = deck.findIndex(c =>
+                            c.cardInfo === card.name &&
+                            c.type === card.type &&
                             c.faction === card.faction
                         );
                         if (index !== -1) {
@@ -1973,12 +2001,12 @@
                 }
                 updateDeckCount();
                 renderDeck();
+                updateCardGalleryCounts(); // Ensure the card gallery counts are updated
             }
-        
+
             function updateDeckCount() {
                 deckCountSpan.textContent = `(${cardCount.total})`;
             }
-        
 
             function renderDeck() {
                 deckContainer.innerHTML = '';
@@ -2058,21 +2086,23 @@
                         }
                     });
                 });
-                deckCompleteContainer.style.marginTop = '0px';
+                //deckCompleteContainer.style.marginTop = '0px';
+                deckContainer.style.marginTop = '0px';
             }
 
-            
             function updateCardGalleryCounts() {
                 cards.forEach(card => {
                     const cardId = card.dataset.cardId;
                     const existingCard = deck.find(item => item.cardId === cardId);
+                    const countSpan = card.querySelector('.count');
                     if (existingCard) {
-                        const countSpan = card.querySelector('.count');
                         countSpan.textContent = existingCard.count;
+                    } else {
+                        countSpan.textContent = 0;
                     }
                 });
             }
-        
+
             const cards = document.querySelectorAll('.card');
             const modal = document.getElementById('popup-modal');
             const closeButton = document.querySelector('.close-button');
@@ -2083,7 +2113,7 @@
             const deckContainer = document.querySelector('.deck');
             const deckCompleteContainer = document.querySelector('.deck-container');
             const deckCountSpan = document.getElementById('deck-count');
-        
+
             cards.forEach(card => {
                 card.addEventListener('click', function(event) {
                     if (event.target.classList.contains('increment') || event.target.classList.contains('decrement')) {
@@ -2103,12 +2133,12 @@
                         console.error('Data attributes are missing or incorrect.');
                     }
                 });
-        
+
                 const decrementButton = card.querySelector('.decrement');
                 const incrementButton = card.querySelector('.increment');
                 const countSpan = card.querySelector('.count');
                 const cardId = card.dataset.cardId;
-        
+
                 decrementButton.addEventListener('click', function(event) {
                     event.stopPropagation();
                     let count = parseInt(countSpan.textContent);
@@ -2124,7 +2154,7 @@
                         updateCardGalleryCounts(); // Update the card gallery counts
                     }
                 });
-        
+
                 incrementButton.addEventListener('click', function(event) {
                     event.stopPropagation();
                     const cardData = {
@@ -2141,14 +2171,15 @@
                     }
                 });
             });
-        
+
             closeButton.addEventListener('click', function() {
                 modal.style.display = 'none';
             });
-        
+
             loadDeckFromStorage();
         });
-        </script>
+
+    </script>
         
     <!-- Apply Filters -->
     <script>
@@ -2258,7 +2289,7 @@
             const deckContainer = document.querySelector('.deck-container');
             const filterSection = document.getElementById('filter-section');
             const additionalSection = document.getElementById('additional-buttons');
-            // const screenshotButton = document.getElementById('screenshot-button');
+            const screenshotButton = document.getElementById('screenshot-button');
 
     
             function disableFilters() {
@@ -2277,7 +2308,7 @@
                 cardContainer.style.display = 'flex';
                 // Hide the deck container
                 deckContainer.style.display = 'none';
-                // screenshotButton.style.display = 'none';
+                screenshotButton.style.display = 'none';
                 // Enable filters
                 enableFilters();
             });
@@ -2287,7 +2318,7 @@
                 cardContainer.style.display = 'none';
                 // Show the deck container
                 deckContainer.style.display = 'flex';
-                // screenshotButton.style.display = 'block';
+                screenshotButton.style.display = 'inline-block';
                 // Disable filters
                 disableFilters();
             });
@@ -2319,54 +2350,72 @@
             });
         });
     </script> -->
-    <!-- <script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
-    const screenshotButton = document.getElementById('screenshot-button');
-    const deckContainer = document.querySelector('.deck-container');
+            const screenshotButton = document.getElementById('screenshot-button');
+            const deckContainer = document.querySelector('.deck-container');
 
-    screenshotButton.addEventListener('click', () => {
-        // Force reflow by accessing offsetWidth
-        deckContainer.offsetWidth;
-
-        // Create a promise to wait for images to load
-        const imagesLoaded = new Promise(resolve => {
-            const images = deckContainer.querySelectorAll('img');
-            let loadedCount = 0;
-            images.forEach(image => {
-                if (image.complete) {
-                    loadedCount++;
-                } else {
-                    image.onload = () => {
-                        loadedCount++;
-                        if (loadedCount === images.length) {
-                            resolve();
+            screenshotButton.addEventListener('click', () => {
+                // Create a promise to wait for images to load
+                const imagesLoaded = new Promise(resolve => {
+                    const images = deckContainer.querySelectorAll('img');
+                    let loadedCount = 0;
+                    images.forEach(image => {
+                        if (image.complete) {
+                            loadedCount++;
+                        } else {
+                            image.onload = () => {
+                                loadedCount++;
+                                if (loadedCount === images.length) {
+                                    resolve();
+                                }
+                            };
                         }
-                    };
-                }
+                    });
+                    if (loadedCount === images.length) {
+                        resolve();
+                    }
+                });
+
+                // Wait for images to load before taking the screenshot
+                imagesLoaded.then(() => {
+                    // Temporarily hide increment and decrement buttons
+                    const buttons = deckContainer.querySelectorAll('.increment, .decrement');
+                    buttons.forEach(button => {
+                        button.style.display = 'none';
+                    });
+
+                    // Temporarily apply styles to ensure visibility and correct dimensions
+                    deckContainer.style.width = deckContainer.scrollWidth + 'px';
+                    deckContainer.style.height = deckContainer.scrollHeight + 'px';
+                    deckContainer.style.backgroundColor = '#212121'; // Set dark background color
+
+                    html2canvas(deckContainer, {
+                        useCORS: true, // Ensure cross-origin images are rendered
+                        logging: true, // Enable logging for debugging
+                        scale: 2 // Increase scale for higher resolution
+                    }).then(canvas => {
+                        // Remove the temporary styles and show buttons again
+                        deckContainer.style.width = '';
+                        deckContainer.style.height = '';
+                        deckContainer.style.backgroundColor = ''; // Reset background color
+                        buttons.forEach(button => {
+                            button.style.display = '';
+                        });
+
+                        // Create a download link for the screenshot
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL();
+                        link.download = 'deck_screenshot.png';
+                        link.click();
+                    }).catch(error => {
+                        console.error('Screenshot capture failed:', error);
+                    });
+                });
             });
-            if (loadedCount === images.length) {
-                resolve();
-            }
         });
 
-        // Wait for images to load before taking the screenshot
-        imagesLoaded.then(() => {
-            // Explicitly set dimensions of deckContainer
-            deckContainer.style.width = deckContainer.scrollWidth + 'px';
-            deckContainer.style.height = deckContainer.scrollHeight + 'px';
-
-            html2canvas(deckContainer).then(canvas => {
-                // Append the canvas to the body
-                document.body.appendChild(canvas);  
-                dataURL = canvas.toDataURL();  
-                // Optionally save the screenshot on the server side
-                pushScreenshotToServer(dataURL); 
-            });  
-        });
-    });
-});
-
-    </script> -->
+    </script>
     
 </body>
 </html>
