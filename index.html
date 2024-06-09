@@ -369,6 +369,7 @@
             position: fixed;
             z-index: 400;
         }
+        
         @media (max-width: 990px) {
             .card {
                 width: calc(16.66% - 1em);
@@ -378,20 +379,23 @@
             }
         }
         @media (max-width: 768px) {
+            body {
+                height: 100%;
+            }
+            
             .container {
                 flex-direction: column;
             }
-            .filters, .card-gallery {
-                width: 100%;
-                height: 50%;
-            }
+            
             .card-gallery{
-                height: 60%;
+                height: 100%;
+                width: 100%;
             }
             .filters{
                 font-size: 10px;
                 height: 40%;
                 padding: 0em 2em;
+                width: 100%;
             }
 
             .card {
@@ -452,6 +456,12 @@
             .deck-card {
                 width: calc(33.3% - 1em);
                 /* height: auto !important; */
+            }
+            .popup-info{
+                padding-top: 0px;
+            }
+            #info-3, #info-2, #info-1{
+                display: none;
             }
         }
 
@@ -1861,19 +1871,19 @@
                         </div>
                         <div class="popup-info">
                             <h2>Card Information</h2>
-                            <div class="info-block">
+                            <div class="info-block" id="info-1">
                                 <label for="popup-name">Name: </label>
                                 <p id="popup-name"></p>
                             </div>
-                            <div class="info-block">
+                            <div class="info-block" id="info-2">
                                 <label for="popup-faction">Faction: </label>
                                 <p id="popup-faction"></p>
                             </div>
-                            <div class="info-block">
+                            <div class="info-block" id="info-3">
                                 <label for="popup-type">Type: </label>
                                 <p id="popup-type"></p>
                             </div>
-                            <div class="info-block">
+                            <div class="info-block" id="info-4">
                                 <label for="popup-note">Note: </label>
                                 <p id="popup-note"></p>
                             </div>
@@ -2376,12 +2386,14 @@
             function disableFilters() {
                 filterSection.classList.add('disabled');
                 additionalSection.style.display = 'none';
+                filterSection.style.display = 'none';
+                deckContainer.style.height = '100%';
             }
     
             function enableFilters() {
                 filterSection.classList.remove('disabled');
                 additionalSection.style.display = 'flex';
-
+                filterSection.style.display = 'block';
             }
     
             cardGalleryButton.addEventListener('click', function() {
@@ -2407,32 +2419,6 @@
     </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const screenshotButton = document.getElementById('screenshot-button');
-            const deckContainer = document.querySelector('.deck-container');
-
-            screenshotButton.addEventListener('click', () => {
-                // Wait for images to load
-                Promise.all(Array.from(deckContainer.querySelectorAll('img')).map(img => {
-                    if (img.complete) return Promise.resolve();
-                    return new Promise(resolve => {
-                        img.onload = img.onerror = resolve;
-                    });
-                })).then(() => {
-                    html2canvas(deckContainer, {
-                        useCORS: true // Enable cross-origin image loading
-                    }).then(canvas => {
-                        const link = document.createElement('a');
-                        link.href = canvas.toDataURL('image/png');
-                        link.download = 'deck-screenshot.png';
-                        link.click();
-                    });
-                });
-            });
-        });
-    </script> -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const screenshotButton = document.getElementById('screenshot-button');
@@ -2499,6 +2485,42 @@
         });
 
     </script>
+
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const filterSection = document.getElementById('filter-section');
+    const cardGallery = document.querySelector('.card-gallery');
+    const modal = document.getElementById('popup-modal'); // Make sure this is defined
+
+    // Function to close the popup when clicking outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Function to scroll filter section up on mobile
+    function scrollFilterUp() {
+        filterSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Attach the scroll function to card click events
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('click', scrollFilterUp);
+    });
+
+    // Optional: Scroll the filter section up when user scrolls down the page
+    window.addEventListener('scroll', function() {
+        if (window.innerWidth <= 768) { // Apply only for mobile view
+            if (window.scrollY > 100) { // Adjust the scroll threshold as needed
+                scrollFilterUp();
+            }
+        }
+    });
+});
+
+    </script> -->
     
 </body>
 </html>
