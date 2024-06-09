@@ -2386,14 +2386,20 @@
             function disableFilters() {
                 filterSection.classList.add('disabled');
                 additionalSection.style.display = 'none';
-                filterSection.style.display = 'none';
-                deckContainer.style.height = '100%';
+                // Check the screen width
+                if (window.innerWidth < 450) {
+                    filterSection.style.display = 'none';
+                    deckContainer.style.height = '100%';
+                }
             }
     
             function enableFilters() {
                 filterSection.classList.remove('disabled');
                 additionalSection.style.display = 'flex';
-                filterSection.style.display = 'block';
+                // Check the screen width
+                if (window.innerWidth < 450) {
+                    filterSection.style.display = 'block';
+                }
             }
     
             cardGalleryButton.addEventListener('click', function() {
