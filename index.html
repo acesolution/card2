@@ -369,6 +369,14 @@
             position: fixed;
             z-index: 400;
         }
+        @media (max-width: 990px) {
+            .card {
+                width: calc(16.66% - 1em);
+            }
+            .deck-card {
+                width: calc(16.66% - 1em);
+            }
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -387,7 +395,7 @@
             }
 
             .card {
-                width: calc(50% - 1em);
+                width: calc(25% - 1em);
             }
             .all-buttons {
                 width: 100%;
@@ -404,7 +412,7 @@
                 margin-top: 10px;
             }
             .deck-card {
-                width: calc(50% - 1em);
+                width: calc(25% - 1em);
                 height: auto !important;
             }
             .deck-card-info{
@@ -413,18 +421,36 @@
             .screenshot-button {
                 margin-left: 25px;
             }
+            .popup-content {
+                width: 80%;
+            }
+            .popup-info {
+                width: 80%;
+                font-size: 12px;
+            }
+            .popup-body {
+                display: flex;
+                flex-direction: column;
+                margin-top: -25px;
+            }
+            .popup-image {
+                width: 100%;
+            }
+            .close-button {
+                float: none;
+            }
         }
 
         @media (max-width: 480px) {
             .card {
-                width: calc(100% - 1em);
+                width: calc(33.3% - 1em);
             }
             .all-buttons{
                 font-size: 13px;
                 height: 8em;
             }
             .deck-card {
-                width: calc(100% - 1em);
+                width: calc(33.3% - 1em);
                 /* height: auto !important; */
             }
         }
@@ -2153,6 +2179,7 @@
             const popupImage = document.getElementById('popup-image');
             const popupName = document.getElementById('popup-name');
             const popupFaction = document.getElementById('popup-faction');
+            const popupNote = document.getElementById('popup-note');
             const popupType = document.getElementById('popup-type');
             const deckContainer = document.querySelector('.deck');
             const deckCompleteContainer = document.querySelector('.deck-container');
@@ -2167,11 +2194,13 @@
                     const cardImage = card.getAttribute('data-card-image');
                     const cardFaction = card.getAttribute('data-faction');
                     const cardType = card.getAttribute('data-type');
+                    const cardNote = card.getAttribute('data-note');
                     if (cardImage && cardInfo && cardFaction && cardType) {
                         popupImage.src = cardImage;
                         popupName.textContent = cardInfo;
                         popupFaction.textContent = cardFaction;
                         popupType.textContent = cardType;
+                        popupNote.textContent = cardNote;
                         modal.style.display = 'block';
                     } else {
                         console.error('Data attributes are missing or incorrect.');
